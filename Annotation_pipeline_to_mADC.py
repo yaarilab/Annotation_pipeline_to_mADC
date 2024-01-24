@@ -113,17 +113,15 @@ def find_project_tsv_files(project_path):
     pre_processed_folders = []
     try:
         runs_folder = os.path.join(project_path, 'runs')
-        folders = os.listdir(runs_folder)
-        for folder in folders:
-            folder_path = os.path.join(runs_folder, folder)
-            annotated_folder_path = os.path.join(folder_path, 'annotated')
-            annotated_folders = os.listdir(annotated_folder_path)
-            pre_processed_folder_path = os.path.join(folder_path, 'pre_processed')
-            if os.path.exists(pre_processed_folder_path):
-                pre_processed_folders = os.listdir(pre_processed_folder_path)
-            
-            tsv_files = start_scan(annotated_folder_path,annotated_folders , False)
-            pre_processed_files = start_scan(pre_processed_folder_path, pre_processed_folders , True)
+        folder_path = os.path.join(runs_folder, 'current')
+        annotated_folder_path = os.path.join(folder_path, 'annotated')
+        annotated_folders = os.listdir(annotated_folder_path)
+        pre_processed_folder_path = os.path.join(folder_path, 'pre_processed')
+        if os.path.exists(pre_processed_folder_path):
+            pre_processed_folders = os.listdir(pre_processed_folder_path)
+        
+        tsv_files = start_scan(annotated_folder_path,annotated_folders , False)
+        pre_processed_files = start_scan(pre_processed_folder_path, pre_processed_folders , True)
 
     except Exception as e:
         print(e)
@@ -156,19 +154,16 @@ def scan_subject_folder(subject_path, pre_processed):
 # Scans a run folder for TSV and metadata files
 def scan_run_folder(sample_path, pre_processed):
     tsv_files = []
-    runs = os.listdir(sample_path)
-    for run in runs:
-        run_path = os.path.join(sample_path, run)
-        run_results = os.listdir(run_path)
-        for result in run_results:
-            result_path = os.path.join(run_path, result)
-            if not pre_processed:
-                file = find_tsv_and_metadata_for_annotated(result_path)
-            else:
-                file = find_metadata_for_pre_processed(result_path)
+    repertoires = os.listdir(sample_path)
+    for rep in repertoires:
+        rep_path = os.path.join(sample_path, rep)
+        if not pre_processed:
+            file = find_tsv_and_metadata_for_annotated(rep_path)
+        else:
+            file = find_metadata_for_pre_processed(rep_path)
 
-            if file != None:
-                tsv_files.append(file[0])
+        if file != None:
+            tsv_files.append(file[0])
     
     return tsv_files
 
