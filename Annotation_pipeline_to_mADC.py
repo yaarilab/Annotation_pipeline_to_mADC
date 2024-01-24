@@ -2,10 +2,10 @@ import os
 import shutil
 import json
 
-#STUDIES_PATH = r'/studies/'
-#STUDIES_TO_COPY_PATH = r"/misc/work/sequence_data_store/"
-STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
-STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\work\to_copy"
+STUDIES_PATH = r'/studies/'
+STUDIES_TO_COPY_PATH = r"/misc/work/sequence_data_store/"
+#STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
+#STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\work\to_copy"
 
 # Extracts repertoire, subject, and sample IDs from a JSON file
 def get_repertoire_details(file_path):
