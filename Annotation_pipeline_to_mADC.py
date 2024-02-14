@@ -1,6 +1,7 @@
 import os
 import shutil
 import json
+import argparse
 
 STUDIES_PATH = r'/work/mADC/studies/'
 STUDIES_TO_COPY_PATH = r"/work/sequence_data_store/"
@@ -241,13 +242,17 @@ def check_study_exist(study):
         return False
 
 if __name__ == '__main__':
-    study = input("Please enter study name, or exit to finish\n")
-    while(study != "exit"):
-        if check_study_exist(study):
-            try:
-                copy_folder_content(STUDIES_TO_COPY_PATH, STUDIES_PATH , study)
-                print(f"{study} as copied to madc")
-            except Exception as e:
-                print(e)
+    parser = argparse.ArgumentParser(description='Process some inputs.')
 
-        study = input("Please enter study name, or exit to finish\n")
+    # Add arguments
+    parser.add_argument('study_name', type=str, help='Name of the study')
+    args = parser.parse_args()
+    study = args.study_name
+    
+    if check_study_exist(study):
+        try:
+            copy_folder_content(STUDIES_TO_COPY_PATH, STUDIES_PATH , study)
+            print(f"{study} as copied to madc")
+        except Exception as e:
+            print(e)
+
