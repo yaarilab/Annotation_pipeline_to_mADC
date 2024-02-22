@@ -180,14 +180,14 @@ def find_metadata_for_pre_processed(result_path):
         folder_path = os.path.join(result_path, folder)
         folder_files = os.listdir(folder_path)
         
-        if 'meta_data' in folder:
+        if 'metadata' in folder:
             if 'pre_processed_metadata.json' in folder_files:
                 res['pre_processed_metadata'] = os.path.join(folder_path, 'pre_processed_metadata.json')
             
             if 'repertoire_id.json' in folder_files:
                 res['repertoire_ids'] = os.path.join(folder_path, 'repertoire_id.json')
 
-    check_result_fileds(res, result_path)
+    check_result_fileds(res, result_path, "pre_processed")
     if all(value is not None for value in res.values()):
         res_list.append(res)
         return res_list
@@ -210,7 +210,7 @@ def find_tsv_and_metadata_for_annotated(result_path):
         folder_path = os.path.join(result_path, folder)
         folder_files = os.listdir(folder_path)
         for file in folder_files:
-            if 'Finale' in file:
+            if 'Finale' in file and folder == "rearrangements":
                 res['file_path'] = os.path.join(folder_path, file)
                 res['file_name'] = file
             
@@ -221,7 +221,7 @@ def find_tsv_and_metadata_for_annotated(result_path):
             if 'annotation_metadata.json' in folder_files:
                 res['annotation_metadata'] = os.path.join(folder_path, 'annotation_metadata.json')
 
-    check_result_fileds(res, result_path)
+    check_result_fileds(res, result_path, "annotation")
     if all(value is not None for value in res.values()):
         res_list.append(res)
         return res_list
@@ -229,10 +229,10 @@ def find_tsv_and_metadata_for_annotated(result_path):
     return None 
 
 # Checks if all required fields in a result are present
-def check_result_fileds(result, folder):
+def check_result_fileds(result, folder, process):
     for key, value in result.items():
         if value == None:
-            print(f"{key} was not found in the {folder}")
+            print(f"{key} was not found in the {folder} for {process}")
 
 def check_study_exist(study):
     if os.path.exists(os.path.join(STUDIES_TO_COPY_PATH,study)):
