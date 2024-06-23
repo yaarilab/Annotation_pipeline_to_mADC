@@ -3,10 +3,10 @@ import shutil
 import json
 import argparse
 
-STUDIES_PATH = r'/work/mADC/studies/'
-STUDIES_TO_COPY_PATH = r"/work/sequence_data_store/"
-#STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
-#STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\work\to_copy"
+#STUDIES_PATH = r'/work/mADC/studies/'
+#STUDIES_TO_COPY_PATH = r"/work/sequence_data_store/"
+STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
+STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\to_copy"
 
 # Extracts repertoire, subject, and sample IDs from a JSON file
 def get_repertoire_details(file_path):
@@ -20,8 +20,18 @@ def get_repertoire_details(file_path):
     return repertoire_id, subject_id, sample_id
 
 # Merges metadata from various sources into a single JSON file in the destination project
-def merge_metadata(project_source, project_dest, tsv_map, pre_processed_map):
-    project_metadata_path = os.path.join(os.path.join(project_source, r'project_metadata'), 'metadata.json')
+def merge_metadata(project_source, project_dest, tsv_map, pre_processed_map, study, chain):
+    metadata_file_name = None
+    metadata_folder = os.listdir(os.path.join(project_source, r'project_metadata'))
+    for file in metadata_folder:
+        if f"{study}_{chain}" in file:
+            metadata_file_name = file
+
+    if metadata_file_name is None:
+        print(f"Error, metadata not found in {os.path.join(project_source, r'project_metadata')}")
+        exit()
+
+    project_metadata_path = os.path.join(project_source, 'project_metadata', metadata_file_name)
     with open(project_metadata_path, 'r') as metadata:
         project_metadata = json.load(metadata)
 
@@ -33,6 +43,8 @@ def merge_metadata(project_source, project_dest, tsv_map, pre_processed_map):
         
         for file in pre_processed_map:
             repertoire_id, subject_id, sample_id = get_repertoire_details(file['repertoire_ids'])
+            repertoire_id = repertoire_id + "_" + chain
+
             with open(file['pre_processed_metadata'], 'r') as pre_processed_metadata:
                 pre_processed_metadata = json.load(pre_processed_metadata)
                 update_pre_processed_metadata(project_metadata, repertoire_id, pre_processed_metadata)
@@ -80,7 +92,7 @@ def merge_json_data_recursive(original_data, new_data):
 
 
 # Copies content from a source directory to a destination directory and merges metadata
-def copy_folder_content(src, dst, study):
+def copy_folder_content(src, dst, study, chain):
     if not os.path.exists(src):
         raise ValueError(f"Source folder {src} does not exist")
 
@@ -90,9 +102,9 @@ def copy_folder_content(src, dst, study):
     
     # for project in os.listdir(src):
     project_path = os.path.join(src, study)
-    tsv_files_paths, pre_processed_files = find_project_tsv_files(project_path)
+    tsv_files_paths, pre_processed_files = find_project_tsv_files(project_path, chain)
 
-    project_dest = os.path.join(dst, study)
+    project_dest = os.path.join(dst, study + "_" + chain)
     if not os.path.exists(project_dest):
         os.makedirs(project_dest)
     
@@ -102,20 +114,20 @@ def copy_folder_content(src, dst, study):
 
     # Copy each file and subfolder from src to dst
     for tsv_file_path in tsv_files_paths:
-        dest = os.path.join(project_dest, tsv_file_path['file_name'])
-        if not os.path.exists(dest):
-            shutil.copy2(tsv_file_path['file_path'], dest) # For files
+        new_file_name = tsv_file_path['file_name'].split("_")[0]+ "_" + chain
+        dest = os.path.join(project_dest, new_file_name)
+        shutil.copy2(tsv_file_path['file_path'], dest) # For files
 
-    merge_metadata(project_path, project_dest, tsv_files_paths, pre_processed_files)
+    merge_metadata(project_path, project_dest, tsv_files_paths, pre_processed_files, study ,chain)
 
 
 # Finds TSV files and pre-processed files within a project directory
-def find_project_tsv_files(project_path):
+def find_project_tsv_files(project_path, chain):
     pre_processed_folders = []
     try:
         runs_folder = os.path.join(project_path, 'runs')
         folder_path = os.path.join(runs_folder, 'current')
-        annotated_folder_path = os.path.join(folder_path, 'annotated')
+        annotated_folder_path = os.path.join(folder_path, f'{chain}_annotated')
         annotated_folders = os.listdir(annotated_folder_path)
         pre_processed_folder_path = os.path.join(folder_path, 'pre_processed')
         if os.path.exists(pre_processed_folder_path):
@@ -245,13 +257,17 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some inputs.')
 
     # Add arguments
-    parser.add_argument('study_name', type=str, help='Name of the study')
-    args = parser.parse_args()
-    study = args.study_name
-    
+    # parser.add_argument('study_name', type=str, help='Name of the study')
+    # parser.add_argument('locus', type=str, help='Name of the locus')
+
+    # args = parser.parse_args()
+    # study = args.study_name
+    # locus = args.locus
+    study = 'PRJEB26509'
+    locus = 'IGK'
     if check_study_exist(study):
         try:
-            copy_folder_content(STUDIES_TO_COPY_PATH, STUDIES_PATH , study)
+            copy_folder_content(STUDIES_TO_COPY_PATH, STUDIES_PATH , study, locus)
             print(f"{study} as copied to madc")
         except Exception as e:
             print(e)
