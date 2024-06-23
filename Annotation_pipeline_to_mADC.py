@@ -3,10 +3,10 @@ import shutil
 import json
 import argparse
 
-#STUDIES_PATH = r'/work/mADC/studies/'
-#STUDIES_TO_COPY_PATH = r"/work/sequence_data_store/"
-STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
-STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\to_copy"
+STUDIES_PATH = r'/work/mADC/studies/'
+STUDIES_TO_COPY_PATH = r"/work/sequence_data_store/"
+#STUDIES_PATH = r'C:\Users\yaniv\Desktop\work\minimal_adc\studies'
+#STUDIES_TO_COPY_PATH = r"C:\Users\yaniv\Desktop\to_copy"
 
 # Extracts repertoire, subject, and sample IDs from a JSON file
 def get_repertoire_details(file_path):
@@ -257,14 +257,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Process some inputs.')
 
     # Add arguments
-    # parser.add_argument('study_name', type=str, help='Name of the study')
-    # parser.add_argument('locus', type=str, help='Name of the locus')
+    parser.add_argument('study_name', type=str, help='Name of the study')
+    parser.add_argument('locus', type=str, help='Name of the locus')
 
-    # args = parser.parse_args()
-    # study = args.study_name
-    # locus = args.locus
-    study = 'PRJEB26509'
-    locus = 'IGK'
+    args = parser.parse_args()
+    study = args.study_name
+    locus = args.locus
+
     if check_study_exist(study):
         try:
             copy_folder_content(STUDIES_TO_COPY_PATH, STUDIES_PATH , study, locus)
